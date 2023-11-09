@@ -1,0 +1,32 @@
+name: Build layer zip files
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Docker Setup QEMU
+      uses: docker/setup-qemu-action@v2.2.0
+      with:
+        platforms: linux/arm64
+
+    - name: build_layer.sh
+      run: ./scripts/build_layer.sh
+
+    - name: Upload dd_trace_dotnet
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: dd_trace_dotnet_layers
+        path: .layers/dd_trace_dotnet_*.zip
+        if-no-files-found: error
