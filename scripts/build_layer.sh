@@ -26,7 +26,13 @@ LAYER_DIR=".layers"
 TARGET_DIR=$(pwd)/$LAYER_DIR
 DOCKERFILE="./scripts/Dockerfile"
 if [ ! -z "$SANDBOX" ]; then
+    echo "using sandbox image"
     DOCKERFILE="./scripts/Dockerfile.sandbox"
+fi
+
+if [ ! -z "$BENCHMARK" ]; then
+    echo "using benchmark image"
+    DOCKERFILE="./scripts/Dockerfile.benchmark"
 fi
 
 # Build the image
