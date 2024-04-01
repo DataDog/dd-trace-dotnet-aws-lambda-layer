@@ -29,6 +29,10 @@ if [ ! -z "$SANDBOX" ]; then
     DOCKERFILE="./scripts/Dockerfile.sandbox"
 fi
 
+if [ ! -z "$BENCHMARK" ]; then
+    DOCKERFILE="./scripts/Dockerfile.benchmark"
+fi
+
 # Build the image
 function docker_build_zip {
     arch=$1
