@@ -37,19 +37,19 @@ fi
 function docker_build_zip {
     arch=$1
 
-    docker buildx build \
-        --platform linux/${arch} \
-        -t datadog/dd_trace_dotnet:$TRACER_VERSION \
+    tmp_dir=$(mktemp -d)
+    docker buildx build -t datadog/dd_trace_dotnet:$TRACER_VERSION . \
         -f $DOCKERFILE \
+        --no-cache \
+        --platform linux/${arch} \
         --build-arg TRACER_VERSION="${TRACER_VERSION}" \
-        --build-arg ARCH=${arch} .
+        --build-arg ARCH=${arch} \
+        -o $tmp_dir/datadog
 
-    # Run the image to copy the zip
-    dockerId=$(docker create datadog/dd_trace_dotnet:$TRACER_VERSION)
-    docker cp $dockerId:/dd_trace_dotnet.zip $TARGET_DIR/dd_trace_dotnet_${arch}.zip
+    cp $tmp_dir/datadog/dd_trace_dotnet.zip $TARGET_DIR/dd_trace_dotnet_${arch}.zip
+    unzip $tmp_dir/datadog/dd_trace_dotnet.zip -d $TARGET_DIR/dd_trace_dotnet_${arch}
 
-    # Make sure the archive can be unzipped
-    unzip $TARGET_DIR/dd_trace_dotnet_${arch}.zip -d $TARGET_DIR/dd_trace_dotnet_${arch}
+    rm -rf $tmp_dir
 }
 
 # Clean and make directories in ./layers

@@ -11,6 +11,9 @@ WORKDIR /opt
 # Copy current branch tracer build
 COPY tracer-build datadog
 
+RUN ls -la
+RUN ls -la datadog
+
 # remove some useless files in a serverless context to keep the package as small as possible
 RUN rm -f datadog/createLogPath.sh && \
     rm -f datadog/*.so && \
@@ -40,5 +43,4 @@ RUN zip -r -9 /datadog/dd_trace_dotnet.zip datadog
 
 # keep the smallest possible docker image
 FROM scratch
-COPY --from=builder /datadog/dd_trace_dotnet.zip /
-ENTRYPOINT ["/dd_trace_dotnet.zip"]
+COPY --from=builder /datadog /
