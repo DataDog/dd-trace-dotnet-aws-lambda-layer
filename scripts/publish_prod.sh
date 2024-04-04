@@ -54,8 +54,8 @@ VERSION=$LAYER_VERSION ARCH=arm64 aws-vault exec sso-prod-engineering -- ./scrip
 echo
 echo "Publishing layers to GovCloud AWS regions..."
 ddsaml2aws login -a govcloud-us1-fed-human-engineering
-VERSION=$LAYER_VERSION ARCH=amd64 AWS_PROFILE=govcloud-us1-fed-human-engineering ./scripts/publish_layer.sh
-VERSION=$LAYER_VERSION ARCH=arm64 AWS_PROFILE=govcloud-us1-fed-human-engineering ./scripts/publish_layer.sh
+VERSION=$LAYER_VERSION ARCH=amd64 aws-vault exec sso-govcloud-us1-fed-engineering -- ./scripts/publish_layer.sh
+VERSION=$LAYER_VERSION ARCH=arm64 aws-vault exec sso-govcloud-us1-fed-engineering -- ./scripts/publish_layer.sh
 
 echo "Creating tag in the datadog-lambda-extension repository for release on GitHub"
 git tag "v$LAYER_VERSION"
