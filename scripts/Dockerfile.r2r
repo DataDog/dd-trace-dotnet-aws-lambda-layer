@@ -15,6 +15,7 @@ RUN apt-get update && \
 WORKDIR /opt
 
 COPY artifacts artifacts
+RUN mkdir -p datadog
 
 # Copy artifacts from the GitLab runner
 RUN if [ "${ARCH}" = "amd64"]; then \
