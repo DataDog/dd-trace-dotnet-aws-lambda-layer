@@ -17,5 +17,6 @@ layer:
   script:
     - .gitlab/download_tracer_artifacts.sh
     - mkdir -p tracer_binaries
-    - unzip artifacts.zip -d tracer_binaries\
+    - ls -la
+    - unzip artifacts.zip -d tracer_binaries
     - ls -la tracer_binaries
