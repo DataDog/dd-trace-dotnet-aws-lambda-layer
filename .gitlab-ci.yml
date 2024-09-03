@@ -1,10 +1,10 @@
 stages:
   - build
 
-layer:
+get artifacts:
   stage: build
-  image: registry.ddbuild.io/ci/serverless-tools:1
   tags: ["arch:amd64"]
+  image: registry.ddbuild.io/ci/serverless-tools:1
   artifacts:
     expire_in: 2 weeks
     paths:
@@ -16,3 +16,35 @@ layer:
   retry: 2
   script:
     - .gitlab/download_tracer_artifacts.sh
+
+build layer (arm64):
+  stage: build
+  tags: ["arch:amd64"]
+  image: registry.ddbuild.io/images/docker:20.10
+  needs: ["get artifacts"]
+  dependencies: ["get artifacts"]
+  artifacts:
+    expire_in: 2 weeks
+    paths:
+      - .layers/dd_trace_dotnet_arm64.zip
+  variables:
+    ARCHITECTURE: arm64
+    R2R: true
+  script:
+    - TRACER_VERSION=2.56.0 ./scripts/build_layer.sh
+
+build layer (arm64):
+  stage: build
+  tags: ["arch:amd64"]
+  image: registry.ddbuild.io/images/docker:20.10
+  needs: ["get artifacts"]
+  dependencies: ["get artifacts"]
+  artifacts:
+    expire_in: 2 weeks
+    paths:
+      - .layers/dd_trace_dotnet_amd64.zip
+  variables:
+    ARCHITECTURE: amd64
+    R2R: true
+  script:
+    - TRACER_VERSION=2.56.0 ./scripts/build_layer.sh
