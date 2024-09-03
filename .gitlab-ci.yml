@@ -15,5 +15,5 @@ layer:
     - when: always
   retry: 2
   script:
-    - ./gitlab/download_tracer_artifacts.sh
+    - .gitlab/download_tracer_artifacts.sh
     - ls -la
