@@ -3,6 +3,8 @@ stages:
 
 layer:
   stage: build
+  image: registry.ddbuild.io/images/docker:20.10
+  tags: ["arch:amd64"]
   # artifacts:
   #   expire_in: 2 weeks
   #   paths:
