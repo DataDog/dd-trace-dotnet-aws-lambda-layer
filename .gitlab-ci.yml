@@ -14,12 +14,6 @@ layer:
       when: never
     - when: always
   retry: 2
-  needs:
-    - project: DataDog/dd-trace-dotnet
-      job: download-serverless-artifacts
-      ref: $UPSTREAM_REF
-      artifacts: true
   script:
-    - echo "Building layer from $UPSTREAM_REF"
+    - ./gitlab/download_tracer_artifacts.sh
     - ls -la
-    - ls artifacts
