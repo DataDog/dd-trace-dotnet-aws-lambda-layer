@@ -14,9 +14,9 @@ RUN apt-get update && \
 
 WORKDIR /opt
 
-ARG arch_path="arm64"
 RUN if [ "${ARCH}" = "amd64"]; then \
-  arch_path="x64"; \
+  arch_path="x64"; else \
+  arch_path="arm64"; \
 fi
 
 # Copy artifacts from the GitLab runner
