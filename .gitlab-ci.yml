@@ -28,7 +28,7 @@ build layer (arm64):
     paths:
       - .layers/dd_trace_dotnet_arm64.zip
   variables:
-    ARCHITECTURE: arm64
+    ARCH: arm64
     R2R: true
   script:
     - TRACER_VERSION=2.56.0 ./scripts/build_layer.sh
@@ -44,7 +44,7 @@ build layer (amd64):
     paths:
       - .layers/dd_trace_dotnet_amd64.zip
   variables:
-    ARCHITECTURE: amd64
+    ARCH: amd64
     R2R: true
   script:
     - TRACER_VERSION=2.56.0 ./scripts/build_layer.sh
