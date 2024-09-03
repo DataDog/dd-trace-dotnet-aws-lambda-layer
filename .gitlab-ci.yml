@@ -3,7 +3,7 @@ stages:
 
 layer:
   stage: build
-  image: registry.ddbuild.io/images/docker:20.10
+  image: registry.ddbuild.io/ci/serverless-tools:1
   tags: ["arch:amd64"]
   # artifacts:
   #   expire_in: 2 weeks
