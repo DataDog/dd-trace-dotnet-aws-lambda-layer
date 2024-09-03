@@ -33,7 +33,7 @@ build layer (arm64):
   script:
     - TRACER_VERSION=2.56.0 ./scripts/build_layer.sh
 
-build layer (arm64):
+build layer (amd64):
   stage: build
   tags: ["arch:amd64"]
   image: registry.ddbuild.io/images/docker:20.10
