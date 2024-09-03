@@ -14,10 +14,10 @@ layer:
       when: never
     - when: always
   retry: 2
-  needs:
-    - pipeline: $UPSTREAM_PIPELINE_ID
-      job: download-serverless-artifacts
-      artifacts: true
+  # needs:
+  #   - pipeline: $UPSTREAM_PIPELINE_ID
+  #     job: download-serverless-artifacts
+  #     artifacts: true
   script:
     - echo "Building layer from $UPSTREAM_PIPELINE_ID"
     - ls -la
