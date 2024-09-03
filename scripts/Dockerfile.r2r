@@ -1,7 +1,7 @@
 # Dockerfile for building a layer from ReadyToRun binaries from GitLab
 #
 
-FROM ubuntu:latest as builder
+FROM ubuntu:latest AS builder
 ARG TRACER_VERSION
 ARG ARCH
 
