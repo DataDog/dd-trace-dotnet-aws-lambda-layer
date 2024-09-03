@@ -16,4 +16,6 @@ layer:
   retry: 2
   script:
     - .gitlab/download_tracer_artifacts.sh
-    - ls -la
+    - mkdir -p tracer_binaries
+    - unzip artifacts.zip -d tracer_binaries\
+    - ls -la tracer_binaries
