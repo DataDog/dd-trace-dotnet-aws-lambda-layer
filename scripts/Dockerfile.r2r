@@ -18,8 +18,8 @@ COPY artifacts artifacts
 RUN mkdir -p datadog
 
 # Copy artifacts from the GitLab runner
-RUN if [ "${ARCH}" = "amd64" ]; then cp -r artifacts/linux-x64/* datadog; fi
-RUN if [ "${ARCH}" = "arm64" ]; then cp -r artifacts/linux-arm64/* datadog; fi
+RUN if [ "${ARCH}" = "amd64" ]; then cp -r artifacts/x64/* datadog; fi
+RUN if [ "${ARCH}" = "arm64" ]; then cp -r artifacts/arm64/* datadog; fi
 
 # remove some useless files in a serverless context to keep the package as small as possible
 RUN rm -f datadog/createLogPath.sh && \
