@@ -5,10 +5,10 @@ layer:
   stage: build
   image: registry.ddbuild.io/ci/serverless-tools:1
   tags: ["arch:amd64"]
-  # artifacts:
-  #   expire_in: 2 weeks
-  #   paths:
-  #     - layer.zip
+  artifacts:
+    expire_in: 2 weeks
+    paths:
+      - artifacts
   rules:
     - if: '$CI_PIPELINE_SOURCE =~ /external_pull_request_event|merge_request_event|push/'
       when: never
@@ -16,7 +16,3 @@ layer:
   retry: 2
   script:
     - .gitlab/download_tracer_artifacts.sh
-    - mkdir -p tracer_binaries
-    - ls -la
-    - unzip artifacts.zip -d tracer_binaries
-    - ls -la tracer_binaries

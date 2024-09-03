@@ -21,3 +21,12 @@ for pipeline_job in $(echo "${PIPELINE_JOBS}" | jq -r '.[] | @base64'); do
         ARTIFACTS=$(curl $ARTIFACTS_URL --header "PRIVATE-TOKEN: $GITLAB_TOKEN" --location --output artifacts.zip)
     fi
 done
+
+target_dir=artifacts
+
+mkdir -p $target_dir
+unzip artifacts.zip -d $target_dir
+mv $target_dir/artifacts/* $target_dir
+rmdir $target_dir/artifacts
+
+ls -R $target_dir
