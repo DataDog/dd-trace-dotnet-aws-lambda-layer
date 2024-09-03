@@ -14,13 +14,13 @@ RUN apt-get update && \
 
 WORKDIR /opt
 
-RUN if [ "${ARCH}" = "amd64"]; then \
-  arch_path="x64"; else \
-  arch_path="arm64"; \
-fi
+COPY artifacts artifacts
 
 # Copy artifacts from the GitLab runner
-COPY artifacts/${arch_path} datadog
+RUN if [ "${ARCH}" = "amd64"]; then \
+    arch_path="x64"; else \
+    arch_path="arm64"; \
+  fi && cp -r artifacts/${arch_path}/* datadog
 
 # remove some useless files in a serverless context to keep the package as small as possible
 RUN rm -f datadog/createLogPath.sh && \
