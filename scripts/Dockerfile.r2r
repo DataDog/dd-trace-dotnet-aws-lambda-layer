@@ -1,0 +1,58 @@
+# Dockerfile for building a layer from ReadyToRun binaries from GitLab
+#
+
+FROM ubuntu:latest as builder
+ARG TRACER_VERSION
+ARG ARCH
+
+# make the args mandatory
+RUN : "${TRACER_VERSION:?TRACER_VERSION needs to be provided}"
+RUN : "${ARCH:?ARCH needs to be provided}"
+
+RUN apt-get update && \
+    apt-get install -y zip curl
+
+WORKDIR /opt
+
+ARG arch_path="arm64"
+RUN if [ "${ARCH}" = "amd64"]; then \
+  arch_path="x64"; \
+fi
+
+# Copy artifacts from the GitLab runner
+COPY artifacts/${arch_path} datadog
+
+# remove some useless files in a serverless context to keep the package as small as possible
+RUN rm datadog/createLogPath.sh && \
+    rm datadog/*.so && \
+    rm datadog/loader.conf && \
+    rm datadog/**/loader.conf && \
+    rm datadog/**/libddwaf.so && \
+    rm datadog/**/Datadog.Trace.ClrProfiler.Native.so && \
+    rm datadog/**/Datadog.Linux.ApiWrapper.x64.so && \
+    rm datadog/**/Datadog.Profiler.Native.so && \
+    rm datadog/**/Datadog.Trace.MSBuild.* && \
+    rm datadog/**/*.pdb && \
+    rm datadog/**/*.xml && \
+    rm datadog/dd-dotnet.sh && \
+    rm datadog/**/dd-dotnet && \
+    rm -rf datadog/netstandard2.0 && \
+    rm -rf datadog/netcoreapp3.1 && \
+    rm -rf datadog/continuousprofiler
+
+# HACK: rename the tracer library so the logic in datadog_wrapper keeps working
+# See also https://github.com/DataDog/datadog-lambda-extension/pull/150
+RUN if [ -f datadog/linux-x64/Datadog.Tracer.Native.so ]; then mv datadog/linux-x64/Datadog.Tracer.Native.so datadog/linux-x64/Datadog.Trace.ClrProfiler.Native.so; fi
+RUN if [ -f datadog/linux-arm64/Datadog.Tracer.Native.so ]; then mv datadog/linux-arm64/Datadog.Tracer.Native.so datadog/linux-arm64/Datadog.Trace.ClrProfiler.Native.so; fi
+
+# add file with tracer version
+RUN echo ${TRACER_VERSION} > datadog/tracer_version.txt
+
+# zip the layer
+RUN mkdir /datadog
+RUN zip -r -9 /datadog/dd_trace_dotnet.zip datadog
+
+# keep the smallest possible docker image
+FROM scratch
+COPY --from=builder /datadog/dd_trace_dotnet.zip /
+ENTRYPOINT ["/dd_trace_dotnet.zip"]
