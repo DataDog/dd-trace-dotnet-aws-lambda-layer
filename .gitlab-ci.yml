@@ -1,0 +1,18 @@
+stages:
+  - build
+
+build:
+  # artifacts:
+  #   expire_in: 2 weeks
+  #   paths:
+  #     - layer.zip
+  rules:
+    - if: '$CI_PIPELINE_SOURCE =~ /external_pull_request_event|merge_request_event|push/'
+      when: never
+    - when: always
+  retry: 2
+  needs:
+    - pipeline: $UPSTREAM_PIPELINE_ID
+      job: download-serverless-artifacts
+  script:
+    - ls artifacts
