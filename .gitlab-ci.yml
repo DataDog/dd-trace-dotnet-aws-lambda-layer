@@ -17,5 +17,8 @@ layer:
   needs:
     - pipeline: $UPSTREAM_PIPELINE_ID
       job: download-serverless-artifacts
+      artifacts: true
   script:
+    - echo "Building layer from $UPSTREAM_PIPELINE_ID"
+    - ls -la
     - ls artifacts
