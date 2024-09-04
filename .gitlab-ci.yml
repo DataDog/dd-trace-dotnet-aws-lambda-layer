@@ -11,18 +11,22 @@ generator:
   image: registry.ddbuild.io/images/mirror/golang:alpine
   tags: ["arch:amd64"]
   cache: *go-cache
+  rules:
+    - if: '$CI_PIPELINE_SOURCE =~ /external_pull_request_event|merge_request_event|push/'
+      when: never
+    - when: always
   script:
     - apk add --no-cache gomplate
     - gomplate --config .gitlab/config.yaml
   artifacts:
     paths:
-      - ci/*-pipeline.yaml
+      - .gitlab/*-pipeline.yaml
 
 build:
   stage: build
   trigger:
     include:
-      - artifact: ci/build-pipeline.yaml
+      - artifact: .gitlab/build-pipeline.yaml
         job: generator
     strategy: depend
   rules:

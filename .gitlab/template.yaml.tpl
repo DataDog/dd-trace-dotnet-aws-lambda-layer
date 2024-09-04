@@ -18,10 +18,6 @@ get artifacts:
     expire_in: 2 weeks
     paths:
       - artifacts
-  rules:
-    - if: '$CI_PIPELINE_SOURCE =~ /external_pull_request_event|merge_request_event|push/'
-      when: never
-    - when: always
   retry: 2
   script:
     - .gitlab/scripts/download_tracer_artifacts.sh
