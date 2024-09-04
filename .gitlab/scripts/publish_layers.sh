@@ -89,6 +89,11 @@ fi
 
 printf "[$REGION] Starting publishing layers...\n"
 
+# Clean environment variables if they are set as 'placeholder'
+if [ "$LAYER_SUFFIX" = "placeholder" ]; then
+    LAYER_SUFFIX=""
+fi
+
 if [ -z "$LAYER_SUFFIX" ]; then
     printf "[$REGION] Deploying layers without suffix\n"
 else
