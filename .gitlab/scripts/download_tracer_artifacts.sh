@@ -15,6 +15,10 @@ echo "Running with the following configuration:"
 echo "UPSTREAM_PIPELINE_ID: $UPSTREAM_PIPELINE_ID"
 echo "TRACER_BRANCH: $TRACER_BRANCH"
 
+# Clean placeholder value from $TRACER_BRANCH
+if [ "$TRACER_BRANCH" = "placeholder" ]; then
+    TRACER_BRANCH=""
+fi
 
 # If 'UPSTREAM_PIPELINE_ID' or 'TRACER_BRANCH' are not set, exit
 if [ -z "$UPSTREAM_PIPELINE_ID" ] && [ -z "$TRACER_BRANCH" ]; then
