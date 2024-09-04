@@ -46,7 +46,7 @@ build layer ({{ $architecture.name }}):
 
 {{ range $environment := (ds "environments").environments }}
 
-{{ if or (eq $environment.name "prod") }}
+{{ if or (eq $environment.name "sandbox") }}
 sign layer ({{ $architecture.name }}):
   stage: sign
   tags: ["arch:amd64"]
@@ -80,13 +80,13 @@ publish layer {{ $environment.name }} ({{ $architecture.name }}):
       allow_failure: true
     - if: '$CI_COMMIT_TAG =~ /^v.*/'
   needs:
-{{ if or (eq $environment.name "prod") }}
+{{ if or (eq $environment.name "sandbox") }}
       - sign layer ({{ $architecture.name }})
 {{ else }}
       - build layer ({{ $architecture.name }})
 {{ end }}
   dependencies:
-{{ if or (eq $environment.name "prod") }}
+{{ if or (eq $environment.name "sandbox") }}
       - sign layer ({{ $architecture.name }})
 {{ else }}
       - build layer ({{ $architecture.name }})
