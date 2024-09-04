@@ -35,7 +35,9 @@ build layer ({{ $architecture.name }}):
   stage: build
   tags: ["arch:amd64"]
   image: registry.ddbuild.io/images/docker:20.10
-  needs: ["get artifacts"]
+  needs:
+    - job: get artifacts
+      artifacts: true
   dependencies: ["get artifacts"]
   artifacts:
     expire_in: 2 weeks
