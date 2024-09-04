@@ -10,10 +10,14 @@ default:
     when:
       - runner_system_failure
 
+variables:
+  CI_DOCKER_TARGET_IMAGE: registry.ddbuild.io/ci/datadog-lambda-extension
+  CI_DOCKER_TARGET_VERSION: latest
+
 get artifacts:
   stage: build
   tags: ["arch:amd64"]
-  image: registry.ddbuild.io/ci/serverless-tools:1
+  image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
   artifacts:
     expire_in: 2 weeks
     paths:
@@ -46,7 +50,7 @@ build layer ({{ $architecture.name }}):
 sign layer ({{ $architecture.name }}):
   stage: sign
   tags: ["arch:amd64"]
-  image: registry.ddbuild.io/images/docker:20.10-py3
+  image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v.*/'
       when: manual
@@ -69,7 +73,7 @@ sign layer ({{ $architecture.name }}):
 publish layer {{ $environment.name }} ({{ $architecture.name }}):
   stage: publish
   tags: ["arch:amd64"]
-  image: registry.ddbuild.io/images/docker:20.10-py3
+  image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
   rules:
     - if: '"{{ $environment.name }}" =~ /^(sandbox|staging)/'
       when: manual
