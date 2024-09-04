@@ -11,6 +11,11 @@ GITLAB_TOKEN=$(aws ssm get-parameter \
 
 TRACER_PROJECT_ID=348
 
+if [ -z "$TRACER_BRANCH" ]; then
+    echo "TRACER_BRANCH is not set."
+    echo $TRACER_BRANCH
+fi
+
 # Clean placeholder value from $TRACER_BRANCH
 if [ "$TRACER_BRANCH" = "placeholder" ]; then
     TRACER_BRANCH=""
