@@ -11,6 +11,11 @@ GITLAB_TOKEN=$(aws ssm get-parameter \
 
 TRACER_PROJECT_ID=348
 
+echo "Running with the following configuration:"
+echo "UPSTREAM_PIPELINE_ID: $UPSTREAM_PIPELINE_ID"
+echo "TRACER_BRANCH: $TRACER_BRANCH"
+
+
 # If 'UPSTREAM_PIPELINE_ID' or 'TRACER_BRANCH' are not set, exit
 if [ -z "$UPSTREAM_PIPELINE_ID" ] && [ -z "$TRACER_BRANCH" ]; then
     echo "None of UPSTREAM_PIPELINE_ID or TRACER_BRANCH is set. Exiting..."
@@ -25,6 +30,7 @@ if [ -z "$UPSTREAM_PIPELINE_ID" ] || [ -n "$TRACER_BRANCH" ]; then
     echo "UPSTREAM_PIPELINE_ID is not set, or TRACER_BRANCH is set. Calculating the latest pipeline ID..."
 
     URL="$CI_API_V4_URL/projects/$TRACER_PROJECT_ID/pipelines?ref=$TRACER_BRANCH&per_page=1&order_by=id&sort=desc"
+    echo "Getting pipelines for '$TRACER_BRANCH' from: $URL"
     PIPELINES=$(curl $URL --header "PRIVATE-TOKEN: $GITLAB_TOKEN")
 
     # Get the latest pipeline ID
