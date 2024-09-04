@@ -22,6 +22,9 @@ get artifacts:
     expire_in: 2 weeks
     paths:
       - artifacts
+    # propagate environment variables to the next job
+    reports:
+      dotenv: .env
   retry: 2
   script:
     - .gitlab/scripts/download_tracer_artifacts.sh
