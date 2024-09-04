@@ -4,7 +4,7 @@ inputFiles:
   - .gitlab/template.yaml.tpl
 
 outputFiles:
-  - .gitlab/pipeline-build.yaml
+  - .gitlab/build-pipeline.yaml
 
 datasources:
   architectures:

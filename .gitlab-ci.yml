@@ -20,7 +20,7 @@ generator:
     - gomplate --config .gitlab/config.yaml
   artifacts:
     paths:
-      - .gitlab/*-pipeline.yaml
+      - .gitlab/build-pipeline.yaml
 
 build:
   stage: build
