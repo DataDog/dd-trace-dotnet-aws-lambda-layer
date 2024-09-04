@@ -14,18 +14,6 @@ variables:
   CI_DOCKER_TARGET_IMAGE: registry.ddbuild.io/ci/dd-trace-dotnet-aws-lambda-layer
   CI_DOCKER_TARGET_VERSION: latest
 
-test:
-  stage: build
-  tags: ["arch:amd64"]
-  image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
-  script:
-    - echo "UPSTREAM_PIPELINE_ID is ${UPSTREAM_PIPELINE_ID}"
-    - echo "VERSION is ${VERSION}"
-    - echo "TRACER_VERSION is ${TRACER_VERSION}"
-    - echo "TRACER_BRANCH is ${TRACER_BRANCH}"
-    - echo "LAYER_SUFFIx is ${LAYER_SUFFIX}"
-    - ls -la
-
 get artifacts:
   stage: build
   tags: ["arch:amd64"]
