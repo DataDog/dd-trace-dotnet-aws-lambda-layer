@@ -1,0 +1,17 @@
+# gomplate template generation pipeline
+
+inputFiles:
+  - .gitlab/template.yaml.tpl
+
+outputFiles:
+  - .gitlab/pipeline-build.yaml
+
+datasources:
+  architectures:
+    url: .gitlab/datasources/architectures.yaml
+  
+  environments:
+    url: .gitlab/datasources/environments.yaml
+
+  regions:
+    url: .gitlab/datasources/regions.yaml
