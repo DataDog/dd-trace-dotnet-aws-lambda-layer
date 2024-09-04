@@ -18,6 +18,7 @@ publish_layer() {
 
     version_nbr=$(aws lambda publish-layer-version --layer-name $layer \
         --description "dd-trace-dotnet" \
+        --compatible-runtimes "dotnet6,dotnet8"
         --compatible-architectures $compatible_architectures \
         --zip-file "fileb://${file}" \
         --region $region \
