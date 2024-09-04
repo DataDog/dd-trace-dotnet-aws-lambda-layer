@@ -24,6 +24,7 @@ generator:
 
 build:
   stage: build
+  needs: ["generator"]
   trigger:
     include:
       - artifact: .gitlab/build-pipeline.yaml
