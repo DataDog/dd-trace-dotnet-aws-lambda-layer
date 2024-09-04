@@ -54,6 +54,8 @@ generator:
   artifacts:
     paths:
       - .gitlab/build-pipeline.yaml
+    reports:
+      dotenv: .env
 
 build:
   stage: build
@@ -63,6 +65,9 @@ build:
       - artifact: .gitlab/build-pipeline.yaml
         job: generator
     strategy: depend
+  needs:
+    - job: generator
+      artifacts: true
   rules:
     - if: '$CI_PIPELINE_SOURCE =~ /external_pull_request_event|merge_request_event|push/'
       when: never
