@@ -4,9 +4,10 @@ variables:
   # Default version for development builds
   # This will be overwritten by the tag version if it is a release.
   VERSION: dev
+  UPSTREAM_PIPELINE_ID: placeholder
   # Manual trigger variables
   TRACER_BRANCH:
-    description: "Branch of the dd-trace-dotnet repository to use. (default: placeholder)"
+    description: "Branch of the dd-trace-dotnet repository to use (default: 'placeholder' will be ignored)."
     value: "placeholder"
   TRACER_VERSION:
     description: "Latest release version of the dd-trace-dotnet to tag the build with."
