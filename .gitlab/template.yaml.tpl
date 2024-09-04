@@ -11,7 +11,7 @@ default:
       - runner_system_failure
 
 variables:
-  CI_DOCKER_TARGET_IMAGE: registry.ddbuild.io/ci/datadog-lambda-extension
+  CI_DOCKER_TARGET_IMAGE: registry.ddbuild.io/ci/dd-trace-dotnet-aws-lambda-layer
   CI_DOCKER_TARGET_VERSION: latest
 
 get artifacts:
