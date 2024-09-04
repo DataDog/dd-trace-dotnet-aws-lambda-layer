@@ -11,14 +11,17 @@
 
 set -e
 
+if [ "$TRACER_VERSION" = "placeholder" ]; then
+    TRACER_VERSION=""
+fi
 
-if [ -z "$UPSTREAM_COMMIT_TAG" ]; then
+
+if [ -z "$TRACER_VERSION" ]; then
     # Running on dev
     echo "Running on dev environment"
     TRACER_VERSION="dev"
 else
-    echo "Found version tag in environment"
-    TRACER_VERSION="${CI_COMMIT_TAG}"
+    echo "Found version tag in environment variables"
     echo "Tracer version: ${TRACER_VERSION}"
 fi
 

@@ -107,12 +107,12 @@ if [[ "$STAGE" =~ ^(staging|sandbox)$ ]]; then
     VERSION=$(($latest_version + 1))
 else
     # Running on prod
-    if [ -z "$UPSTREAM_COMMIT_TAG" ]; then
-        printf "[ERROR]: No CI_COMMIT_TAG from UPSTREAM found.\n"
+    if [ -z "$CI_COMMIT_TAG" ]; then
+        printf "[ERROR]: No CI_COMMIT_TAG found.\n"
         printf "Exiting script...\n"
         exit 1
     else
-        printf "Tag found in environment: $UPSTREAM_COMMIT_TAG\n"
+        printf "Tag found in environment: $CI_COMMIG_TAG\n"
     fi
 
     # TODO(duncanista): extract version from maybe CI_COMMIT_TAG?

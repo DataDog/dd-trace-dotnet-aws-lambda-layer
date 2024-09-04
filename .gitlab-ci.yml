@@ -51,6 +51,7 @@ generator:
     # These variables are used to trigger the build job manually, when the pipeline is triggered by an external source
     # these are not set, so we reset them to a placeholder.
     - if [ -z "$TRACER_BRANCH" ] || [ "$TRACER_BRANCH" = "placeholder" ]; then echo "TRACER_BRANCH=placeholder" >> .env; fi
+    - if [ -z "$TRACER_VERSION" ] || [ "$TRACER_VERSION" = "placeholder" ]; then echo "TRACER_VERSION=placeholder" >> .env; fi
     - if [ -z "$UPSTREAM_PIPELINE_ID" ] || [ "$UPSTREAM_PIPELINE_ID" = "placeholder" ]; then echo "UPSTREAM_PIPELINE_ID=placeholder" >> .env; fi
     - if [ -z "$LAYER_SUFFIX" ] || [ "$LAYER_SUFFIX" = "placeholder" ]; then echo "LAYER_SUFFIX=placeholder" >> .env; fi
     - apk add --no-cache gomplate
@@ -78,7 +79,6 @@ build:
     - when: always
   variables:
     UPSTREAM_PIPELINE_ID: "$UPSTREAM_PIPELINE_ID"
-    UPSTREAM_COMMIT_TAG: "$UPSTREAM_COMMIT_TAG"
     VERSION: "$VERSION"
     TRACER_BRANCH: "$TRACER_BRANCH"
     LAYER_SUFFIX: "$LAYER_SUFFIX"

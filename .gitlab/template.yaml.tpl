@@ -42,7 +42,7 @@ build layer ({{ $architecture.name }}):
     ARCH: {{ $architecture.name }}
     R2R: true
   script:
-    - TRACER_VERSION=2.56.0 ./scripts/build_layer.sh
+    - ./scripts/build_layer.sh
 
 {{ range $environment := (ds "environments").environments }}
 
