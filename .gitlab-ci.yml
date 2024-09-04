@@ -1,50 +1,32 @@
 stages:
+  - pre 
   - build
 
-get artifacts:
-  stage: build
+.go-cache: &go-cache
+  key: dd-trace-dotnet-aws-lambda-layer-go-cache
+  policy: pull
+
+generator:
+  stage: pre
+  image: registry.ddbuild.io/images/mirror/golang:alpine
   tags: ["arch:amd64"]
-  image: registry.ddbuild.io/ci/serverless-tools:1
+  cache: *go-cache
+  script:
+    - apk add --no-cache gomplate
+    - gomplate --config .gitlab/config.yaml
   artifacts:
-    expire_in: 2 weeks
     paths:
-      - artifacts
+      - ci/*-pipeline.yaml
+
+build:
+  stage: build
+  trigger:
+    include:
+      - artifact: ci/build-pipeline.yaml
+        job: generator
+    strategy: depend
   rules:
-    - if: '$CI_PIPELINE_SOURCE =~ /external_pull_request_event|merge_request_event|push/'
-      when: never
-    - when: always
-  retry: 2
-  script:
-    - .gitlab/download_tracer_artifacts.sh
-
-build layer (arm64):
-  stage: build
-  tags: ["arch:amd64"]
-  image: registry.ddbuild.io/images/docker:20.10
-  needs: ["get artifacts"]
-  dependencies: ["get artifacts"]
-  artifacts:
-    expire_in: 2 weeks
-    paths:
-      - .layers/dd_trace_dotnet_arm64.zip
+    - when: on_success
   variables:
-    ARCH: arm64
-    R2R: true
-  script:
-    - TRACER_VERSION=2.56.0 ./scripts/build_layer.sh
-
-build layer (amd64):
-  stage: build
-  tags: ["arch:amd64"]
-  image: registry.ddbuild.io/images/docker:20.10
-  needs: ["get artifacts"]
-  dependencies: ["get artifacts"]
-  artifacts:
-    expire_in: 2 weeks
-    paths:
-      - .layers/dd_trace_dotnet_amd64.zip
-  variables:
-    ARCH: amd64
-    R2R: true
-  script:
-    - TRACER_VERSION=2.56.0 ./scripts/build_layer.sh
+    UPSTREAM_PIPELINE_ID: $UPSTREAM_PIPELINE_ID
+    UPSTREAM_COMMIT_TAG: $UPSTREAM_COMMIT_TAG
