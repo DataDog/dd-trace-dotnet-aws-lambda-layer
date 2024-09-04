@@ -1,6 +1,19 @@
 variables:
   DOCKER_TARGET_IMAGE: registry.ddbuild.io/ci/dd-trace-dotnet-aws-lambda-layer
   DOCKER_TARGET_VERSION: latest
+  # Default version for development builds
+  # This will be overwritten by the tag version if it is a release.
+  VERSION: dev
+  # Manual trigger variables
+  TRACER_BRANCH:
+    description: "Branch of the dd-trace-dotnet repository to use."
+    value: master
+  TRACER_VERSION:
+    description: "Latest release version of the dd-trace-dotnet to tag the build with."
+    value: "2.58.0"
+  LAYER_SUFFIX:
+    description: "Suffix to be appended to the layer name (default empty)."
+    value: ""
 
 stages:
   - pre 
@@ -34,6 +47,7 @@ generator:
       when: never
     - when: always
   script:
+    - if [[ "$CI_COMMIT_TAG" =~ ^v[0-9]+$ ]]; then echo "VERSION=${CI_COMMIT_TAG//[!0-9]/}" >> .env; fi
     - apk add --no-cache gomplate
     - gomplate --config .gitlab/config.yaml
   artifacts:
@@ -55,3 +69,7 @@ build:
   variables:
     UPSTREAM_PIPELINE_ID: $UPSTREAM_PIPELINE_ID
     UPSTREAM_COMMIT_TAG: $UPSTREAM_COMMIT_TAG
+    VERSION: $VERSION
+    TRACER_BRANCH: $TRACER_BRANCH
+    LAYER_SUFFIX: $LAYER_SUFFIX
+    TRACER_VERSION: $TRACER_VERSION
