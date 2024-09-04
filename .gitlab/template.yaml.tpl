@@ -14,6 +14,18 @@ variables:
   CI_DOCKER_TARGET_IMAGE: registry.ddbuild.io/ci/dd-trace-dotnet-aws-lambda-layer
   CI_DOCKER_TARGET_VERSION: latest
 
+test:
+  stage: build
+  tags: ["arch:amd64"]
+  image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
+  script:
+    - echo "UPSTREAM_PIPELINE_ID is ${UPSTREAM_PIPELINE_ID}"
+    - echo "VERSION is ${VERSION}"
+    - echo "TRACER_VERSION is ${TRACER_VERSION}"
+    - echo "TRACER_BRANCH is ${TRACER_BRANCH}"
+    - echo "LAYER_SUFFIx is ${LAYER_SUFFIX}"
+    - ls -la
+
 get artifacts:
   stage: build
   tags: ["arch:amd64"]
@@ -22,9 +34,6 @@ get artifacts:
     expire_in: 2 weeks
     paths:
       - artifacts
-    # propagate environment variables to the next job
-    reports:
-      dotenv: .env
   retry: 2
   script:
     - .gitlab/scripts/download_tracer_artifacts.sh
@@ -35,9 +44,7 @@ build layer ({{ $architecture.name }}):
   stage: build
   tags: ["arch:amd64"]
   image: registry.ddbuild.io/images/docker:20.10
-  needs:
-    - job: get artifacts
-      artifacts: true
+  needs: ["get artifacts"]
   dependencies: ["get artifacts"]
   artifacts:
     expire_in: 2 weeks
@@ -47,6 +54,7 @@ build layer ({{ $architecture.name }}):
     ARCH: {{ $architecture.name }}
     R2R: true
   script:
+    - echo ls -la
     - .gitlab/scripts/build_layer.sh
 
 {{ range $environment := (ds "environments").environments }}
