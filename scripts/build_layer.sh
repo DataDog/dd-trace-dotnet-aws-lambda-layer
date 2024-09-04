@@ -33,10 +33,6 @@ if [ ! -z "$BENCHMARK" ]; then
     DOCKERFILE="./scripts/Dockerfile.benchmark"
 fi
 
-if [ ! -z "R2R" ]; then
-    DOCKERFILE="./scripts/Dockerfile.r2r"
-fi
-
 # Build the image
 function docker_build_zip {
     arch=$1
