@@ -54,7 +54,6 @@ build layer ({{ $architecture.name }}):
     ARCH: {{ $architecture.name }}
     R2R: true
   script:
-    - echo ls -la
     - .gitlab/scripts/build_layer.sh
 
 {{ range $environment := (ds "environments").environments }}

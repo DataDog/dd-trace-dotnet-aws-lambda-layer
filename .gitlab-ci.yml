@@ -9,8 +9,8 @@ variables:
     description: "Branch of the dd-trace-dotnet repository to use (default empty)."
     value: ""
   TRACER_VERSION:
-    description: "Latest release version of the dd-trace-dotnet to tag the build with."
-    value: "2.58.0"
+    description: "Latest release version of the dd-trace-dotnet to tag the build with (default empty)."
+    value: ""
   LAYER_SUFFIX:
     description: "Suffix to be appended to the layer name (default empty)."
     value: ""
