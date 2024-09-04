@@ -11,6 +11,15 @@ GITLAB_TOKEN=$(aws ssm get-parameter \
 
 TRACER_PROJECT_ID=348
 
+# Clean environment variables if they are set as 'placeholder'
+if [ "$UPSTREAM_PIPELINE_ID" = "placeholder" ]; then
+    UPSTREAM_PIPELINE_ID=""
+fi
+
+if [ "$TRACER_BRANCH" = "placeholder" ]; then
+    TRACER_BRANCH=""
+fi
+
 echo "Running with the following configuration:"
 echo "UPSTREAM_PIPELINE_ID: $UPSTREAM_PIPELINE_ID"
 echo "TRACER_BRANCH: $TRACER_BRANCH"

@@ -7,7 +7,7 @@ variables:
   # Manual trigger variables
   TRACER_BRANCH:
     description: "Branch of the dd-trace-dotnet repository to use."
-    value: "placeholder"
+    value: ""
   TRACER_VERSION:
     description: "Latest release version of the dd-trace-dotnet to tag the build with."
     value: "2.58.0"
@@ -48,8 +48,8 @@ generator:
     - when: always
   script:
     - if [[ "$CI_COMMIT_TAG" =~ ^v[0-9]+$ ]]; then echo "VERSION=${CI_COMMIT_TAG//[!0-9]/}" >> .env; fi
-    - echo "TRACE_BRANCH is $TRACER_BRANCH"
-    - echo "UPSTREAM_PIPELINE_ID is $UPSTREAM_PIPELINE_ID"
+    - if [ -z "$TRACER_BRANCH" ] || [ "$TRACER_BRANCH" = "placeholder" ]; then echo "TRACER_BRANCH=placeholder" >> .env; fi
+    - if [ -z "$UPSTREAM_PIPELINE_ID" ] || [ "$UPSTREAM_PIPELINE_ID" = "placeholder" ]; then echo "UPSTREAM_PIPELINE_ID=placeholder" >> .env; fi
     - apk add --no-cache gomplate
     - gomplate --config .gitlab/config.yaml
   artifacts:
