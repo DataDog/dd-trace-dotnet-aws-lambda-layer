@@ -42,7 +42,7 @@ build layer ({{ $architecture.name }}):
     ARCH: {{ $architecture.name }}
     R2R: true
   script:
-    - ./scripts/build_layer.sh
+    - .gitlab/scripts/build_layer.sh
 
 {{ range $environment := (ds "environments").environments }}
 

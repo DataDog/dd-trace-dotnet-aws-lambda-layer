@@ -15,7 +15,6 @@ if [ "$TRACER_VERSION" = "placeholder" ]; then
     TRACER_VERSION=""
 fi
 
-
 if [ -z "$TRACER_VERSION" ]; then
     # Running on dev
     echo "Running on dev environment"
