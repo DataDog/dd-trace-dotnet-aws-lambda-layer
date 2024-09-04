@@ -31,7 +31,9 @@ build:
         job: generator
     strategy: depend
   rules:
-    - when: on_success
+    - if: '$CI_PIPELINE_SOURCE =~ /external_pull_request_event|merge_request_event|push/'
+      when: never
+    - when: always
   variables:
     UPSTREAM_PIPELINE_ID: $UPSTREAM_PIPELINE_ID
     UPSTREAM_COMMIT_TAG: $UPSTREAM_COMMIT_TAG
