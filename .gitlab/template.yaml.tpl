@@ -69,7 +69,7 @@ sign layer ({{ $architecture.name }}):
 publish layer {{ $environment.name }} ({{ $architecture.name }}):
   stage: publish
   tags: ["arch:amd64"]
-  image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
+  image: registry.ddbuild.io/images/docker:20.10-py3
   rules:
     - if: '"{{ $environment.name }}" =~ /^(sandbox|staging)/'
       when: manual
