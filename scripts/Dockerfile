@@ -25,6 +25,8 @@ RUN rm datadog/createLogPath.sh && \
     rm datadog/loader.conf && \
     rm datadog/**/loader.conf && \
     rm datadog/**/libddwaf.so && \
+    # Revise to use 'Datadog.Trace.ClrProfiler.Native.so' for profiling, which calls
+    # 'Datadog.Trace.Native.so' and 'Datadog.Trace.Profiler.so'.
     rm datadog/**/Datadog.Trace.ClrProfiler.Native.so && \
     rm datadog/**/Datadog.Linux.ApiWrapper.x64.so && \
     rm datadog/**/Datadog.Profiler.Native.so && \
@@ -39,6 +41,8 @@ RUN rm datadog/createLogPath.sh && \
 
 # HACK: rename the tracer library so the logic in datadog_wrapper keeps working
 # See also https://github.com/DataDog/datadog-lambda-extension/pull/150
+#
+# We are doing this because the actual 'Datadog.Trace.ClrProfiler.Native.so' is a demux which calls this binary and 'Datadog.Trace.Profiler.so'.
 RUN if [ -f datadog/linux-x64/Datadog.Tracer.Native.so ]; then mv datadog/linux-x64/Datadog.Tracer.Native.so datadog/linux-x64/Datadog.Trace.ClrProfiler.Native.so; fi
 RUN if [ -f datadog/linux-arm64/Datadog.Tracer.Native.so ]; then mv datadog/linux-arm64/Datadog.Tracer.Native.so datadog/linux-arm64/Datadog.Trace.ClrProfiler.Native.so; fi
 
