@@ -1,4 +1,7 @@
-FROM ubuntu:latest as builder
+# Dockerfile for building a layer from ReadyToRun binaries from GitLab
+#
+
+FROM ubuntu:latest AS builder
 ARG TRACER_VERSION
 ARG ARCH
 
@@ -9,32 +12,31 @@ RUN : "${ARCH:?ARCH needs to be provided}"
 RUN apt-get update && \
     apt-get install -y zip curl
 
-# download the required tracer
-RUN ARTIFACT_NAME=datadog-dotnet-apm_${TRACER_VERSION}_${ARCH}.deb && \
-    REPO_NAME="DataDog/dd-trace-dotnet" && \
-    curl -Lo /tmp/tracer.deb https://github.com/${REPO_NAME}/releases/download/v${TRACER_VERSION}/${ARTIFACT_NAME}
-
-# uncompress the package
-RUN dpkg -i /tmp/tracer.deb
-
 WORKDIR /opt
 
+COPY artifacts artifacts
+RUN mkdir -p datadog
+
+# Copy artifacts from the GitLab runner
+RUN if [ "${ARCH}" = "amd64" ]; then cp -r artifacts/x64/* datadog; fi
+RUN if [ "${ARCH}" = "arm64" ]; then cp -r artifacts/arm64/* datadog; fi
+
 # remove some useless files in a serverless context to keep the package as small as possible
-RUN rm datadog/createLogPath.sh && \
-    rm datadog/*.so && \
-    rm datadog/loader.conf && \
-    rm datadog/**/loader.conf && \
-    rm datadog/**/libddwaf.so && \
+RUN rm -f datadog/createLogPath.sh && \
+    rm -f datadog/*.so && \
+    rm -f datadog/loader.conf && \
+    rm -f datadog/**/loader.conf && \
+    rm -f datadog/**/libddwaf.so && \
     # Revise to use 'Datadog.Trace.ClrProfiler.Native.so' for profiling, which calls
     # 'Datadog.Trace.Native.so' and 'Datadog.Trace.Profiler.so'.
-    rm datadog/**/Datadog.Trace.ClrProfiler.Native.so && \
-    rm datadog/**/Datadog.Linux.ApiWrapper.x64.so && \
-    rm datadog/**/Datadog.Profiler.Native.so && \
-    rm datadog/**/Datadog.Trace.MSBuild.* && \
-    rm datadog/**/*.pdb && \
-    rm datadog/**/*.xml && \
-    rm datadog/dd-dotnet.sh && \
-    rm datadog/**/dd-dotnet && \
+    rm -f datadog/**/Datadog.Trace.ClrProfiler.Native.so && \
+    rm -f datadog/**/Datadog.Linux.ApiWrapper.x64.so && \
+    rm -f datadog/**/Datadog.Profiler.Native.so && \
+    rm -f datadog/**/Datadog.Trace.MSBuild.* && \
+    rm -f datadog/**/*.pdb && \
+    rm -f datadog/**/*.xml && \
+    rm -f datadog/dd-dotnet.sh && \
+    rm -f datadog/**/dd-dotnet && \
     rm -rf datadog/netstandard2.0 && \
     rm -rf datadog/netcoreapp3.1 && \
     rm -rf datadog/continuousprofiler

@@ -1,0 +1,85 @@
+variables:
+  DOCKER_TARGET_IMAGE: registry.ddbuild.io/ci/dd-trace-dotnet-aws-lambda-layer
+  DOCKER_TARGET_VERSION: latest
+  # Default version for development builds
+  # This will be overwritten by the tag version if it is a release.
+  VERSION: dev
+  # Manual trigger variables
+  TRACER_BRANCH:
+    description: "Branch of the dd-trace-dotnet repository to use (default empty)."
+    value: ""
+  TRACER_VERSION:
+    description: "Latest release version of the dd-trace-dotnet to tag the build with (default empty)."
+    value: ""
+  LAYER_SUFFIX:
+    description: "Suffix to be appended to the layer name (default empty)."
+    value: ""
+
+stages:
+  - pre 
+  - build
+
+.go-cache: &go-cache
+  key: dd-trace-dotnet-aws-lambda-layer-go-cache
+  policy: pull
+
+ci image:
+  stage: build
+  image: registry.ddbuild.io/images/docker:20.10
+  tags: ["arch:arm64"]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"'
+      changes:
+        - .gitlab/Dockerfile
+      when: on_success
+  variables:
+    DOCKER_TARGET: ${DOCKER_TARGET_IMAGE}:${DOCKER_TARGET_VERSION}
+  script:
+    - docker buildx build --platform linux/amd64,linux/arm64 --no-cache --pull --push --tag ${DOCKER_TARGET} -f .gitlab/Dockerfile .
+
+generator:
+  stage: pre
+  image: registry.ddbuild.io/images/mirror/golang:alpine
+  tags: ["arch:amd64"]
+  cache: *go-cache
+  rules:
+    - if: '$CI_PIPELINE_SOURCE =~ /external_pull_request_event|merge_request_event|push/'
+      when: never
+    - when: always
+  script:
+    - if [[ "$CI_COMMIT_TAG" =~ ^v[0-9]+$ ]]; then echo "VERSION=${CI_COMMIT_TAG//[!0-9]/}" >> .env; fi
+    # These variables are used to trigger the build job manually, when the pipeline is triggered by an external source
+    # these are not set, so we reset them to a placeholder.
+    - if [ -z "$TRACER_BRANCH" ] || [ "$TRACER_BRANCH" = "placeholder" ]; then echo "TRACER_BRANCH=placeholder" >> .env; fi
+    - if [ -z "$TRACER_VERSION" ] || [ "$TRACER_VERSION" = "placeholder" ]; then echo "TRACER_VERSION=placeholder" >> .env; fi
+    - if [ -z "$UPSTREAM_PIPELINE_ID" ] || [ "$UPSTREAM_PIPELINE_ID" = "placeholder" ]; then echo "UPSTREAM_PIPELINE_ID=placeholder" >> .env; fi
+    - if [ -z "$LAYER_SUFFIX" ] || [ "$LAYER_SUFFIX" = "placeholder" ]; then echo "LAYER_SUFFIX=placeholder" >> .env; fi
+    - apk add --no-cache gomplate
+    - gomplate --config .gitlab/config.yaml
+  artifacts:
+    paths:
+      - .gitlab/build-pipeline.yaml
+    reports:
+      dotenv: .env
+
+build:
+  stage: build
+  needs: ["generator"]
+  trigger:
+    include:
+      - artifact: .gitlab/build-pipeline.yaml
+        job: generator
+    strategy: depend
+  needs:
+    - job: generator
+      artifacts: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE =~ /external_pull_request_event|merge_request_event|push/'
+      when: never
+    - when: always
+  variables:
+    UPSTREAM_PIPELINE_ID: $UPSTREAM_PIPELINE_ID
+    VERSION: $VERSION
+    TRACER_BRANCH: $TRACER_BRANCH
+    LAYER_SUFFIX: $LAYER_SUFFIX
+    TRACER_VERSION: $TRACER_VERSION

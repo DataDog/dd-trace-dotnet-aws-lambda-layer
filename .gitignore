@@ -1,3 +1,5 @@
 .layers
 .DS_Store
 Datadog.Trace.dll
+
+.gitlab/build-pipeline.yaml
