@@ -48,7 +48,7 @@ fi
 echo "UPSTREAM_PIPELINE_ID: $UPSTREAM_PIPELINE_ID"
 
 # Get the jobs of the upstream pipeline
-URL="$CI_API_V4_URL/projects/$TRACER_PROJECT_ID/pipelines/$UPSTREAM_PIPELINE_ID/jobs"
+URL="$CI_API_V4_URL/projects/$TRACER_PROJECT_ID/pipelines/$UPSTREAM_PIPELINE_ID/jobs?per_page=50"
 echo "Looking for the artifacts job 'download-serverless-artifacts' for pipeline ID '$UPSTREAM_PIPELINE_ID' in '$URL'"
 PIPELINE_JOBS=$(curl $URL --header "PRIVATE-TOKEN: $GITLAB_TOKEN")
 
@@ -57,6 +57,7 @@ FOUND_ARTIFACTS_JOB=false
 for pipeline_job in $(echo "${PIPELINE_JOBS}" | jq -r '.[] | @base64'); do
     # Only check the 'download-serverless-artifacts' job
     pipeline_job_name=$(echo "${pipeline_job}" | base64 --decode | jq -r '.name')
+    echo "Checking job: $pipeline_job_name"
     if [ "${pipeline_job_name}" = "download-serverless-artifacts" ]; then
         FOUND_ARTIFACTS_JOB=true
         pipeline_job_id=$(echo ${pipeline_job} | base64 --decode | jq -r '.id')
