@@ -1,4 +1,4 @@
-FROM ubuntu:latest as builder
+FROM ubuntu:latest AS builder
 ARG TRACER_VERSION
 ARG ARCH
 
