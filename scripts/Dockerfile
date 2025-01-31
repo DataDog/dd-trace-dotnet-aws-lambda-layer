@@ -20,18 +20,18 @@ RUN dpkg -i /tmp/tracer.deb
 WORKDIR /opt
 
 # remove some useless files in a serverless context to keep the package as small as possible
-RUN rm datadog/createLogPath.sh && \
-    rm datadog/*.so && \
-    rm datadog/loader.conf && \
-    rm datadog/**/loader.conf && \
-    rm datadog/**/libddwaf.so && \
-    rm datadog/**/Datadog.Linux.ApiWrapper.x64.so && \
-    rm datadog/**/Datadog.Profiler.Native.so && \
-    rm datadog/**/Datadog.Trace.MSBuild.* && \
-    rm datadog/**/*.pdb && \
-    rm datadog/**/*.xml && \
-    rm datadog/dd-dotnet.sh && \
-    rm datadog/**/dd-dotnet && \
+RUN rm -f datadog/createLogPath.sh && \
+    rm -f datadog/*.so && \
+    rm -f datadog/loader.conf && \
+    rm -f datadog/**/loader.conf && \
+    rm -f datadog/**/libddwaf.so && \
+    rm -f datadog/**/Datadog.Linux.ApiWrapper.x64.so && \
+    rm -f datadog/**/Datadog.Profiler.Native.so && \
+    rm -f datadog/**/Datadog.Trace.MSBuild.* && \
+    rm -f datadog/**/*.pdb && \
+    rm -f datadog/**/*.xml && \
+    rm -f datadog/dd-dotnet.sh && \
+    rm -f datadog/**/dd-dotnet && \
     rm -rf datadog/net461 && \
     rm -rf datadog/netstandard2.0 && \
     rm -rf datadog/netcoreapp3.1 && \
