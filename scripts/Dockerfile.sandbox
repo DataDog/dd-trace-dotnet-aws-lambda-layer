@@ -34,6 +34,7 @@ RUN rm datadog/createLogPath.sh && \
     rm datadog/**/Datadog.Trace.MSBuild.* && \
     rm datadog/**/*.pdb && \
     rm datadog/**/*.xml && \
+    rm -rf datadog/net461 && \
     rm -rf datadog/netstandard2.0 && \
     rm -rf datadog/netcoreapp3.1 && \
     rm -rf datadog/continuousprofiler
