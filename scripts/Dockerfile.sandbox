@@ -37,7 +37,8 @@ RUN rm -f datadog/createLogPath.sh && \
     rm -rf datadog/net461 && \
     rm -rf datadog/netstandard2.0 && \
     rm -rf datadog/netcoreapp3.1 && \
-    rm -rf datadog/continuousprofiler
+    rm -rf datadog/continuousprofiler \
+    rm -rf datadog/win-*
 
 # add file with tracer version
 RUN echo ${TRACER_VERSION} > datadog/tracer_version.txt
