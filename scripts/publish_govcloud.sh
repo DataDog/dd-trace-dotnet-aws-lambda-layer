@@ -87,7 +87,7 @@ NEW_VERSION=$(aws-vault exec sso-govcloud-us1-fed-engineering -- \
     --region $REGION \
     | jq -r '.Version')
 
-printf "Setting permission for dd-trace-dotnet..."
+printf "Setting permission for dd-trace-dotnet...\n"
 permission=$(aws-vault exec sso-govcloud-us1-fed-engineering -- \
     aws lambda add-layer-version-permission --layer-name dd-trace-dotnet \
     --version-number $NEW_VERSION \
@@ -97,7 +97,7 @@ permission=$(aws-vault exec sso-govcloud-us1-fed-engineering -- \
     --region $REGION
 )
 
-printf "Setting permission for dd-trace-dotnet-ARM..."
+printf "Setting permission for dd-trace-dotnet-ARM...\n"
 permission=$(aws-vault exec sso-govcloud-us1-fed-engineering -- \
     aws lambda add-layer-version-permission --layer-name dd-trace-dotnet-ARM \
     --version-number $NEW_VERSION \
