@@ -23,7 +23,6 @@ WORKDIR /opt
 RUN rm -f datadog/createLogPath.sh && \
     rm -f datadog/*.so && \
     rm -f datadog/loader.conf && \
-    rm -f datadog/**/loader.conf && \
     rm -f datadog/**/libddwaf.so && \
     rm -f datadog/**/Datadog.Linux.ApiWrapper.x64.so && \
     rm -f datadog/**/Datadog.Profiler.Native.so && \
