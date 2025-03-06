@@ -108,3 +108,49 @@ publish layer {{ $environment_name }} ({{ $architecture.name }}):
 {{- end }} # environments end
 
 {{- end }} # architectures end
+
+layer bundle:
+  stage: build
+  tags: ["arch:amd64"]
+  image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
+  needs:
+    {{ range (ds "architectures").architectures }}
+    - build layer ({{ .name }})
+    {{ end }}
+  dependencies:
+    {{ range (ds "architectures").architectures }}
+    - build layer ({{ .name }})
+    {{ end }}
+  artifacts:
+    expire_in: 1 hr
+    paths:
+      - dd_trace_dotnet-bundle-${CI_JOB_ID}/
+    name: dd_trace_dotnet-bundle-${CI_JOB_ID}
+  script:
+    - rm -rf dd_trace_dotnet-bundle-${CI_JOB_ID}
+    - mkdir -p dd_trace_dotnet-bundle-${CI_JOB_ID}
+    - cp .layers/dd_trace_dotnet_*.zip dd_trace_dotnet-bundle-${CI_JOB_ID}
+
+signed layer bundle:
+  stage: sign
+  image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
+  tags: ["arch:amd64"]
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v.*/'
+  needs:
+    {{ range (ds "architectures").architectures }}
+    - sign layer ({{ .name }})
+    {{ end }}
+  dependencies:
+    {{ range (ds "architectures").architectures }}
+    - sign layer ({{ .name }})
+    {{ end }}
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - dd_trace_dotnet-signed-bundle-${CI_JOB_ID}/
+    name: dd_trace_dotnet-signed-bundle-${CI_JOB_ID}
+  script:
+    - rm -rf dd_trace_dotnet-signed-bundle-${CI_JOB_ID}
+    - mkdir -p dd_trace_dotnet-signed-bundle-${CI_JOB_ID}
+    - cp .layers/dd_trace_dotnet_*.zip dd_trace_dotnet-signed-bundle-${CI_JOB_ID}
