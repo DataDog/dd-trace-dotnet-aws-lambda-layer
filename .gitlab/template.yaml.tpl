@@ -44,9 +44,9 @@ build layer ({{ $architecture.name }}):
   script:
     - .gitlab/scripts/build_layer.sh
 
-{{ range $environment := (ds "environments").environments }}
+{{ range $environment_name, $environment := (ds "environments").environments }}
 
-{{ if or (eq $environment.name "prod") }}
+{{ if eq $environment_name "prod" }}
 sign layer ({{ $architecture.name }}):
   stage: sign
   tags: ["arch:amd64"]
@@ -67,26 +67,26 @@ sign layer ({{ $architecture.name }}):
   before_script:
     - EXTERNAL_ID_NAME={{ $environment.external_id }} ROLE_TO_ASSUME={{ $environment.role_to_assume }} AWS_ACCOUNT={{ $environment.account }} source .gitlab/scripts/get_secrets.sh
   script:
-    - .gitlab/scripts/sign_layers.sh {{ $environment.name }}
+    - .gitlab/scripts/sign_layers.sh {{ $environment_name }}
 {{ end }}
 
-publish layer {{ $environment.name }} ({{ $architecture.name }}):
+publish layer {{ $environment_name }} ({{ $architecture.name }}):
   stage: publish
   tags: ["arch:amd64"]
   image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
   rules:
-    - if: '"{{ $environment.name }}" =~ "sandbox"'
+    - if: '"{{ $environment_name }}" =~ "sandbox"'
       when: manual
       allow_failure: true
     - if: '$CI_COMMIT_TAG =~ /^v.*/'
   needs:
-{{ if or (eq $environment.name "prod") }}
+{{ if eq $environment_name "prod" }}
       - sign layer ({{ $architecture.name }})
 {{ else }}
       - build layer ({{ $architecture.name }})
 {{ end }}
   dependencies:
-{{ if or (eq $environment.name "prod") }}
+{{ if eq $environment_name "prod" }}
       - sign layer ({{ $architecture.name }})
 {{ else }}
       - build layer ({{ $architecture.name }})
@@ -99,7 +99,7 @@ publish layer {{ $environment.name }} ({{ $architecture.name }}):
   variables:
     ARCHITECTURE: {{ $architecture.name }}
     LAYER_FILE: dd_trace_dotnet_{{ $architecture.name }}.zip
-    STAGE: {{ $environment.name }}
+    STAGE: {{ $environment_name }}
   before_script:
     - EXTERNAL_ID_NAME={{ $environment.external_id }} ROLE_TO_ASSUME={{ $environment.role_to_assume }} AWS_ACCOUNT={{ $environment.account }} source .gitlab/scripts/get_secrets.sh
   script:
