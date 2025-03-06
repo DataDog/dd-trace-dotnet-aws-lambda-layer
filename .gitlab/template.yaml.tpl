@@ -75,7 +75,7 @@ publish layer {{ $environment.name }} ({{ $architecture.name }}):
   tags: ["arch:amd64"]
   image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
   rules:
-    - if: '"{{ $environment.name }}" =~ /^(sandbox|staging)/'
+    - if: '"{{ $environment.name }}" =~ "sandbox"'
       when: manual
       allow_failure: true
     - if: '$CI_COMMIT_TAG =~ /^v.*/'
