@@ -44,9 +44,6 @@ build layer ({{ $architecture.name }}):
   script:
     - .gitlab/scripts/build_layer.sh
 
-{{ range $environment_name, $environment := (ds "environments").environments }}
-
-{{ if eq $environment_name "prod" }}
 sign layer ({{ $architecture.name }}):
   stage: sign
   tags: ["arch:amd64"]
@@ -65,10 +62,13 @@ sign layer ({{ $architecture.name }}):
   variables:
     LAYER_FILE: dd_trace_dotnet_{{ $architecture.name }}.zip
   before_script:
+    {{ with $environment := (ds "environments").environments.prod }}
     - EXTERNAL_ID_NAME={{ $environment.external_id }} ROLE_TO_ASSUME={{ $environment.role_to_assume }} AWS_ACCOUNT={{ $environment.account }} source .gitlab/scripts/get_secrets.sh
+    {{ end }}
   script:
-    - .gitlab/scripts/sign_layers.sh {{ $environment_name }}
-{{ end }}
+    - .gitlab/scripts/sign_layers.sh prod
+
+{{ range $environment_name, $environment := (ds "environments").environments }}
 
 publish layer {{ $environment_name }} ({{ $architecture.name }}):
   stage: publish
