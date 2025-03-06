@@ -1,110 +1,102 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
-# Download layer from your prod release artifacts in Gitlab. Put layers in .layers
-# Use with `VERSION=<version> REGION=<govcloud region> ./publish_govcloud.sh <DESIRED_NEW_VERSION>
+# Unless explicitly stated otherwise all files in this repository are licensed
+# under the Apache License Version 2.0.
+# This product includes software developed at Datadog (https://www.datadoghq.com/).
+# Copyright 2025 Datadog, Inc.
+#
+# USAGE: download the layer bundle from the build pipeline in gitlab. Use the
+# Download button on the `layer bundle` job. This will be a zip file containing
+# all of the required layers. Run this script as follows:
+#
+# ENVIRONMENT=[us1-staging-fed or us1-fed] [LAYER_NAME_SUFFIX=optional-layer-suffix] [REGIONS=us-gov-west-1] ./scripts/publish_govcloud.sh <layer-bundle.zip>
+#
+# protip: you can drag the zip file from finder into your terminal to insert
+# its path.
 
-if [ ! -f "../.layers/dd_trace_dotnet_amd64.zip" ]; then
-    printf "[ERROR]: Could not find .layers/dd_trace_dotnet_amd64.zip. Download from prod release artifacts.\n"
+set -e
+
+LAYER_PACKAGE=$1
+
+if [ -z "$LAYER_PACKAGE" ]; then
+    printf "[ERROR]: layer package not provided\n"
     exit 1
 fi
 
-if [ ! -f "../.layers/dd_trace_dotnet_arm64.zip" ]; then
-    printf "[ERROR]: Could not find .layers/dd_trace_dotnet_arm64.zip. Download from prod release artifacts.\n"
+PACKAGE_NAME=$(basename "$LAYER_PACKAGE" .zip)
+
+if [ -z "$ENVIRONMENT" ]; then
+    printf "[ERROR]: ENVIRONMENT not specified\n"
     exit 1
 fi
 
-if [ -z "$VERSION" ]; then
-    printf "Must specify a desired version number using VERSION env var\n"
-    exit 1
-fi
+if [ "$ENVIRONMENT" = "us1-staging-fed" ]; then
+    AWS_VAULT_ROLE=sso-govcloud-us1-staging-fed-power-user
 
-if [ -z "$REGION" ]; then
-  printf "Must specify region using REGION env var\n"
-  exit 1
-fi
+    export STAGE=gov-staging
 
-echo "Ensuring you have access to the AWS GovCloud account..."
-aws-vault exec sso-govcloud-us1-fed-engineering -- aws sts get-caller-identity
-
-AVAILABLE_REGIONS=$(aws-vault exec sso-govcloud-us1-fed-engineering -- aws ec2 describe-regions | jq -r '.[] | .[] | .RegionName')
-echo "Available regions:"
-echo "$AVAILABLE_REGIONS"
-REGION_VALID=false
-echo
-
-for available_region in $AVAILABLE_REGIONS; do
-    if [ "$REGION" == "$available_region" ]; then
-        REGION_VALID=true
-        break
+    if [[ ! "$PACKAGE_NAME" =~ ^dd_trace_dotnet-(signed-)?bundle-[0-9]+$ ]]; then
+        echo "[ERROR]: Unexpected package name: $PACKAGE_NAME"
+        exit 1
     fi
+
+elif [ $ENVIRONMENT = "us1-fed" ]; then
+    AWS_VAULT_ROLE=sso-govcloud-us1-fed-engineering
+
+    export STAGE=gov-prod
+
+    if [[ ! "$PACKAGE_NAME" =~ ^dd_trace_dotnet-signed-bundle-[0-9]+$ ]]; then
+        echo "[ERROR]: Unexpected package name: $PACKAGE_NAME"
+        exit 1
+    fi
+
+else
+    printf "[ERROR]: ENVIRONMENT not supported, must be us1-staging-fed or us1-fed.\n"
+    exit 1
+fi
+
+TEMP_DIR=$(mktemp -d)
+unzip $LAYER_PACKAGE -d $TEMP_DIR
+mkdir -p .layers
+cp -v $TEMP_DIR/$PACKAGE_NAME/*.zip .layers/
+
+
+AWS_VAULT_PREFIX="aws-vault exec $AWS_VAULT_ROLE --"
+
+echo "Checking that you have access to the GovCloud AWS account"
+$AWS_VAULT_PREFIX aws sts get-caller-identity
+
+
+AVAILABLE_REGIONS=$($AWS_VAULT_PREFIX aws ec2 describe-regions | jq -r '.[] | .[] | .RegionName')
+
+# Determine the target regions
+if [ -z "$REGIONS" ]; then
+    echo "Region not specified, running for all available regions."
+    REGIONS=$AVAILABLE_REGIONS
+else
+    echo "Region specified: $REGIONS"
+    if [[ ! "$AVAILABLE_REGIONS" == *"$REGIONS"* ]]; then
+        echo "Could not find $REGIONS in available regions: $AVAILABLE_REGIONS"
+        echo ""
+        echo "EXITING SCRIPT."
+        exit 1
+    fi
+fi
+
+for region in $REGIONS
+do
+    echo "Starting publishing layers for region $region..."
+
+    export REGION=$region
+
+    for arch in "amd64" "arm64"; do
+        export ARCHITECTURE=$arch
+        export LAYER_FILE="dd_trace_dotnet_${ARCHITECTURE}.zip"
+
+        echo "Publishing layer $LAYER_FILE for $ARCHITECTURE"
+
+        $AWS_VAULT_PREFIX .gitlab/scripts/publish_layers.sh
+    done
 done
 
-if [ "$REGION_VALID" != "true" ]; then
-    echo "[ERROR]: Invalid region '$REGION'. Available regions are:"
-    echo "$AVAILABLE_REGIONS"
-    echo
-    exit 1
-fi
-
-LATEST_VERSION=$(aws-vault exec sso-govcloud-us1-fed-engineering \
- -- aws lambda list-layer-versions \
- --region $REGION --layer-name dd-trace-dotnet \
- --query 'LayerVersions[0].Version || `0`')
-EXPECTED_VERSION=$((LATEST_VERSION + 1))
-
-
-if [ "$VERSION" != "$EXPECTED_VERSION" ]; then
-    echo "[ERROR]: Version must be sequential. Latest version is $LATEST_VERSION, so next version must be $EXPECTED_VERSION"
-    echo
-    exit 1
-fi
-
-echo "Publishing tracer layer version $VERSION to region $REGION"
-read -p "Continue? (y/n): " CONFIRM
-if [[ $CONFIRM != "y" ]]; then
-    echo "Aborting."
-    echo
-    exit 1
-fi
-
-printf "Publishing dd-trace-dotnet...\n"
-NEW_VERSION=$(aws-vault exec sso-govcloud-us1-fed-engineering -- \
-    aws lambda publish-layer-version --layer-name dd-trace-dotnet \
-    --description "dd-trace-dotnet" \
-    --compatible-runtimes "dotnet6" "dotnet8" \
-    --compatible-architectures "x86_64" \
-    --zip-file "fileb://../.layers/dd_trace_dotnet_amd64.zip" \
-    --region $REGION \
-    | jq -r '.Version')
-
-printf "Publishing dd-trace-dotnet-ARM...\n"
-NEW_VERSION=$(aws-vault exec sso-govcloud-us1-fed-engineering -- \
-    aws lambda publish-layer-version --layer-name dd-trace-dotnet-ARM \
-    --description "dd-trace-dotnet" \
-    --compatible-runtimes "dotnet6" "dotnet8" \
-    --compatible-architectures "arm64" \
-    --zip-file "fileb://../.layers/dd_trace_dotnet_arm64.zip" \
-    --region $REGION \
-    | jq -r '.Version')
-
-printf "Setting permission for dd-trace-dotnet...\n"
-permission=$(aws-vault exec sso-govcloud-us1-fed-engineering -- \
-    aws lambda add-layer-version-permission --layer-name dd-trace-dotnet \
-    --version-number $NEW_VERSION \
-    --statement-id "release-$NEW_VERSION" \
-    --action lambda:GetLayerVersion \
-    --principal "*" \
-    --region $REGION
-)
-
-printf "Setting permission for dd-trace-dotnet-ARM...\n"
-permission=$(aws-vault exec sso-govcloud-us1-fed-engineering -- \
-    aws lambda add-layer-version-permission --layer-name dd-trace-dotnet-ARM \
-    --version-number $NEW_VERSION \
-    --statement-id "release-$NEW_VERSION" \
-    --action lambda:GetLayerVersion \
-    --principal "*" \
-    --region $REGION
-)
-
-echo "Published layer v$NEW_VERSION to $REGION!"
+echo "Done !"

@@ -8,7 +8,7 @@
 set -e
 
 LAYER_DIR=".layers"
-VALID_ACCOUNTS=("sandbox" "prod")
+VALID_ACCOUNTS=("sandbox" "prod" "gov-staging" "gov-prod")
 
 publish_layer() {
     region=$1
@@ -101,7 +101,7 @@ else
     LAYER_NAME="${LAYER_NAME}-${LAYER_SUFFIX}"
 fi
 
-if [[ "$STAGE" =~ ^(staging|sandbox)$ ]]; then
+if [[ "$STAGE" =~ ^(staging|sandbox|gov-staging)$ ]]; then
     # Deploy latest version
     latest_version=$(aws lambda list-layer-versions --region $REGION --layer-name $LAYER_NAME --query 'LayerVersions[0].Version || `0`')
     VERSION=$(($latest_version + 1))

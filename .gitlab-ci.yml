@@ -6,7 +6,7 @@ variables:
   VERSION: dev
   # Manual trigger variables
   TRACER_BRANCH:
-    description: "Branch of the dd-trace-dotnet repository to use (default empty)."
+    description: "Branch of the dd-trace-dotnet repository to use (default empty). For a basic testing, you can use master or something."
     value: ""
   TRACER_VERSION:
     description: "Latest release version of the dd-trace-dotnet to tag the build with (default empty)."
