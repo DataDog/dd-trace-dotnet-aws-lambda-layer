@@ -19,6 +19,7 @@ RUN rm -f datadog/createLogPath.sh && \
     rm -f datadog/**/Datadog.Linux.ApiWrapper.x64.so && \
     rm -f datadog/**/Datadog.Profiler.Native.so && \
     rm -f datadog/**/Datadog.Trace.MSBuild.* && \
+    rm -f datadog/**/libdatadog_profiling.so \
     rm -f datadog/**/*.pdb && \
     rm -f datadog/**/*.xml && \
     rm -f datadog/dd-dotnet.sh && \
