@@ -34,6 +34,8 @@ RUN rm -f datadog/createLogPath.sh && \
     rm -f datadog/**/libdatadog_profiling.so \
     rm -f datadog/**/*.pdb && \
     rm -f datadog/**/*.xml && \
+    rm -f datadog/dd-dotnet.sh && \
+    rm -f datadog/**/dd-dotnet && \
     rm -rf datadog/net461 && \
     rm -rf datadog/netstandard2.0 && \
     rm -rf datadog/netcoreapp3.1 && \
