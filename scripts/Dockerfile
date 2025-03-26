@@ -19,7 +19,7 @@ RUN dpkg -i /tmp/tracer.deb
 
 WORKDIR /opt
 
-# remove some useless files in a serverless context to keep the package as small as possible
+# remove files unused in a serverless context to keep the package as small as possible
 RUN rm -f datadog/createLogPath.sh && \
     rm -f datadog/*.so && \
     rm -f datadog/loader.conf && \
