@@ -25,8 +25,8 @@ publish_layer() {
         | jq -r '.Version'
     )
 
-    # Add permissions only for prod
-    if [ "$STAGE" == "prod" ]; then
+    # Add permissions only for prod and gov-prod
+    if [ "$STAGE" == "prod" ] || [ "$STAGE" == "gov-prod" ]; then
         permission=$(aws lambda add-layer-version-permission --layer-name $layer \
             --version-number $version_nbr \
             --statement-id "release-$version_nbr" \
