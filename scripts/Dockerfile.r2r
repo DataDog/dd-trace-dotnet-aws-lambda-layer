@@ -10,35 +10,41 @@ RUN : "${TRACER_VERSION:?TRACER_VERSION needs to be provided}"
 RUN : "${ARCH:?ARCH needs to be provided}"
 
 RUN apt-get update && \
-    apt-get install -y zip curl
+    apt-get install -y zip
 
 WORKDIR /opt
 
 COPY artifacts artifacts
 RUN mkdir -p datadog
 
-# Copy artifacts from the GitLab runner
-RUN if [ "${ARCH}" = "amd64" ]; then cp -r artifacts/x64/* datadog; fi
-RUN if [ "${ARCH}" = "arm64" ]; then cp -r artifacts/arm64/* datadog; fi
+RUN if [ "${ARCH}" = "amd64" ]; then \
+      # Copy artifacts from the GitLab runner
+      cp -r artifacts/x64/* datadog; \
+      # Move native files to the expected location
+      mv datadog/Datadog.Trace.ClrProfiler.Native.so datadog/linux-x64; \
+      mv datadog/loader.conf datadog/linux-x64; \
+    fi
 
-# remove files unused in a serverless context to keep the package as small as possible
-RUN rm -f datadog/createLogPath.sh && \
-    rm -f datadog/*.so && \
-    rm -f datadog/loader.conf && \
-    rm -f datadog/**/libddwaf.so && \
-    rm -f datadog/**/Datadog.Linux.ApiWrapper.x64.so && \
-    rm -f datadog/**/Datadog.Profiler.Native.so && \
-    rm -f datadog/**/Datadog.Trace.MSBuild.* && \
-    rm -f datadog/**/libdatadog_profiling.so \
-    rm -f datadog/**/*.pdb && \
-    rm -f datadog/**/*.xml && \
-    rm -f datadog/dd-dotnet.sh && \
-    rm -f datadog/**/dd-dotnet && \
-    rm -rf datadog/net461 && \
-    rm -rf datadog/netstandard2.0 && \
-    rm -rf datadog/netcoreapp3.1 && \
-    rm -rf datadog/continuousprofiler \
-    rm -rf datadog/win-*
+RUN if [ "${ARCH}" = "arm64" ]; then \
+      # Copy artifacts from the GitLab runner
+      cp -r artifacts/arm64/* datadog; \
+      # Move native files to the expected location
+      mv datadog/Datadog.Trace.ClrProfiler.Native.so datadog/linux-arm64; \
+      mv datadog/loader.conf datadog/linux-arm64; \
+    fi
+
+# remove files not used in AWS Lambda to keep the layer as small as possible
+RUN \
+    # Profiling and Crash Tracking
+    rm -f datadog/Datadog.Linux.ApiWrapper.x64.so && \
+    rm -f datadog/linux-*/libdatadog_profiling.so \
+    # AAP (formerly AppSec and ASM)
+    rm -f datadog/linux-*/libddwaf.so && \
+    # Test Optimization (CI Visibility)
+    rm -f datadog/net6.0/Datadog.Trace.MSBuild.* && \
+    # Debugger symbols and XML docs
+    rm -f datadog/net6.0/Datadog.Trace.pdb && \
+    rm -f datadog/net6.0/Datadog.Trace.xml
 
 # add file with tracer version
 RUN echo ${TRACER_VERSION} > datadog/tracer_version.txt
