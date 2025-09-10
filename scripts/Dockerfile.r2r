@@ -10,7 +10,7 @@ RUN : "${TRACER_VERSION:?TRACER_VERSION needs to be provided}"
 RUN : "${ARCH:?ARCH needs to be provided}"
 
 RUN apt-get update && \
-    apt-get install -y zip curl
+    apt-get install -y zip
 
 WORKDIR /opt
 
