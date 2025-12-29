@@ -109,6 +109,22 @@ publish layer {{ $environment_name }} ({{ $architecture.name }}):
 
 {{- end }} # architectures end
 
+update-layer-versions-docs:
+  stage: publish
+  trigger:
+    project: DataDog/serverless-ci
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v.*/'
+  needs:
+  {{ range (ds "architectures").architectures }}
+    - publish layer prod ({{ .name }})
+    {{ end }}
+  variables:
+    RUN_LAMBDA_LAYER_DOCUMENTATION: "true"
+    RUN_LAMBDA_DATADOG_CI: "true"
+    RUN_LAMBDA_UI_LAYER_VERSIONS: "true"
+    RUN_LAMBDA_RUNTIMES: "true"
+
 layer bundle:
   stage: build
   tags: ["arch:amd64"]
