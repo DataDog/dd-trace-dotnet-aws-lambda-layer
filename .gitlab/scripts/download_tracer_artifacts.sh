@@ -44,6 +44,7 @@ if [ -z "$UPSTREAM_PIPELINE_ID" ] || [ -n "$TRACER_BRANCH" ]; then
     echo "Getting pipelines for '$TRACER_BRANCH' from: $URL"
     PIPELINES=$(curl $URL --header "PRIVATE-TOKEN: $GITLAB_TOKEN")
 
+    echo $PIPELINES
     # Get the latest pipeline ID
     UPSTREAM_PIPELINE_ID=$(echo "${PIPELINES}" | jq -r '.[0] | @base64' | base64 --decode | jq -r '.id')
 fi
@@ -55,9 +56,12 @@ URL="$CI_API_V4_URL/projects/$TRACER_PROJECT_ID/pipelines/$UPSTREAM_PIPELINE_ID/
 echo "Looking for the artifacts job 'download-serverless-artifacts' for pipeline ID '$UPSTREAM_PIPELINE_ID' in '$URL'"
 PIPELINE_JOBS=$(curl $URL --header "PRIVATE-TOKEN: $GITLAB_TOKEN")
 
+echo $PIPELINE_JOBS
+
 FOUND_ARTIFACTS_JOB=false
 # Iterate over pipeline trigger jobs
 for pipeline_job in $(echo "${PIPELINE_JOBS}" | jq -r '.[] | @base64'); do
+    echo "here"
     # Only check the 'download-serverless-artifacts' job
     pipeline_job_name=$(echo "${pipeline_job}" | base64 --decode | jq -r '.name')
     echo "Checking job: $pipeline_job_name"
