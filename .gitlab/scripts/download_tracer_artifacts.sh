@@ -2,13 +2,6 @@
 
 set -e
 
-#GITLAB_TOKEN=$(aws ssm get-parameter \
-#    --region us-east-1 \
-#    --name "ci.$CI_PROJECT_NAME.serverless-gitlab-token" \
-#    --with-decryption \
-#    --query "Parameter.Value" \
-#    --out text)
-
 curl -OL "binaries.ddbuild.io/dd-source/authanywhere/LATEST/authanywhere-linux-amd64"
 mv "authanywhere-linux-amd64" /bin/authanywhere
 chmod +x /bin/authanywhere
