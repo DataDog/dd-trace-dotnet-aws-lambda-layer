@@ -37,6 +37,9 @@ fi
 if [ -z "$UPSTREAM_PIPELINE_ID" ] || [ -n "$TRACER_BRANCH" ]; then
     echo "UPSTREAM_PIPELINE_ID is not set, or TRACER_BRANCH is set. Calculating the latest pipeline ID..."
 
+    echo $CI_API_V4_URL
+    echo $TRACER_PROJECT_ID
+    echo $TRACER_BRANCH
     URL="$CI_API_V4_URL/projects/$TRACER_PROJECT_ID/pipelines?ref=$TRACER_BRANCH&per_page=1&order_by=id&sort=desc"
     echo "Getting pipelines for '$TRACER_BRANCH' from: $URL"
     PIPELINES=$(curl $URL --header "PRIVATE-TOKEN: $GITLAB_TOKEN")
