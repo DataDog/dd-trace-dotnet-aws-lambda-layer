@@ -2,12 +2,15 @@
 
 set -e
 
-GITLAB_TOKEN=$(aws ssm get-parameter \
-    --region us-east-1 \
-    --name "ci.$CI_PROJECT_NAME.serverless-gitlab-token" \
-    --with-decryption \
-    --query "Parameter.Value" \
-    --out text)
+curl -OL "binaries.ddbuild.io/dd-source/authanywhere/LATEST/authanywhere-linux-amd64"
+mv "authanywhere-linux-amd64" /bin/authanywhere
+chmod +x /bin/authanywhere
+
+BTI_CI_API_TOKEN=$(authanywhere --audience rapid-devex-ci)
+BTI_RESPONSE=$(curl --silent --request GET \
+        --header "$BTI_CI_API_TOKEN" \  --header "Content-Type: application/vnd.api+json" \
+        "https://bti-ci-api.us1.ddbuild.io/internal/ci/gitlab/token?owner=DataDog&repository=dd-trace-dotnet")
+GITLAB_TOKEN=$(echo "$BTI_RESPONSE" | jq -r '.token // empty')
 
 TRACER_PROJECT_ID=348
 
